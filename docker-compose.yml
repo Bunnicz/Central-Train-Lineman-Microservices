@@ -50,7 +50,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_DB=${POSTGRES_NAME}
       - DATABASE_NAME=${DATABASE_NAME}
-    command: flask --app app run --host=0.0.0.0 # DO ZMIANY
+    command: flask --app app run --host=0.0.0.0
     stop_signal: SIGINT
     depends_on:
       - postgres

@@ -46,7 +46,7 @@ class TrainStreamConsumer:
         self.fast_log = setup_train_loger("FAST")
         self.station_log = setup_train_loger("STATION")
 
-    def listener(self, sleep_ms: int = 10000) -> None:
+    def listener(self, sleep_ms: int = 1000) -> None:
         """Redis stream consumer listener.
 
         Gets train (producer) data and logs it to files.
