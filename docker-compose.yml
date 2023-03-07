@@ -15,21 +15,6 @@ services:
     container_name: redis
     image: redis:alpine
 
-  # train:
-  #   container_name: train
-  #   build:
-  #     context: ./train
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./train:/train
-  #   environment:
-  #     - REDIS_HOST_NAME=${REDIS_HOST_NAME}
-  #     - REDIS_PORT=${REDIS_PORT}
-  #     - STREAM_KEY=${STREAM_KEY}
-  #   restart: on-failure
-  #   depends_on:
-  #     - redis
-
   central:
     container_name: central
     restart: on-failure
@@ -42,9 +27,11 @@ services:
       - REDIS_HOST_NAME=${REDIS_HOST_NAME}
       - REDIS_PORT=${REDIS_PORT}
       - STREAM_KEY=${STREAM_KEY}
+      - API_URI=${API_URI}
     command: python main.py
     depends_on:
       - redis
+      - lineman
 
   lineman:
     container_name: lineman
@@ -82,7 +69,7 @@ services:
       - redis
       - postgres
 
-  celery_beat:
+  train:
     build:
       context: ./train
       dockerfile: Dockerfile

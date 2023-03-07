@@ -22,6 +22,6 @@ beat_schedule = {
     },
     "stream-train-near-station": {
         "task": "tasks.stream_train_near_station",
-        "schedule": 20.0,
+        "schedule": 180.0,
     },
 }

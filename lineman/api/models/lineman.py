@@ -5,7 +5,7 @@ class Lineman(db.Model):
     """Lineman Table."""
 
     __tablename__ = "lineman"
-    
+
     id = db.Column(db.Integer, unique=True, primary_key=True)
     is_open = db.Column(db.Boolean, nullable=False, default=False)
     timestamp = db.Column(db.DateTime, default=db.func.now())

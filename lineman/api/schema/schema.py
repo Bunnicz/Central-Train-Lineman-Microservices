@@ -1,26 +1,11 @@
 from flask_marshmallow import Schema
-from marshmallow.fields import Str, Bool
-
-
-class WelcomeSchema(Schema):
-    class Meta:
-        # Fields to expose
-        fields = ["message"]
-
-    message = Str()
+from marshmallow.fields import Bool, Str
 
 
 class StateSchema(Schema):
     class Meta:
         # Fields to expose
-        fields = ["is_open"]
+        fields = ["is_open", "timestamp"]
 
-    message = Bool()
-
-
-class ToggleSchema(Schema):
-    class Meta:
-        # Fields to expose
-        fields = ["toggle"]
-
-    message = Str()
+    is_open = Bool()
+    timestamp = Str()

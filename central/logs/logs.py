@@ -1,5 +1,44 @@
 import logging
 
+
+def setup_train_loger(name: str) -> logging:
+    """Returs logging class object configurated
+    with file handler, formatter and level  "INFO".
+
+    Args:
+        name (str): name of the file. <name>.log
+
+    Returns:
+        logging: logging class object.
+    """
+    logger = logging.getLogger(name)
+    handler = logging.FileHandler(f"logs/{name.lower()}.log")
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(message)s", "%Y-%m-%d %H:%M:%S"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel("INFO")
+
+    return logger
+
+
+if __name__ == "__main__":
+    slow = setup_train_loger("SLOW")
+    normal = setup_train_loger("NORMAL")
+    fast = setup_train_loger("FAST")
+
+    print(slow.getEffectiveLevel())
+    slow.info("TEST LOG")
+    normal.info("TEST LOG")
+    fast.info("TEST LOG")
+
+    print(logging.Logger.manager.loggerDict)
+    # print(hasattr(logging, "SLOW"))
+    # print(hasattr(logging, "slow"))
+    # print(hasattr(logging.getLoggerClass(), "SLOW"))
+
+
 # https://stackoverflow.com/a/35804945
 # def addLoggingLevel(levelName, levelNum, methodName=None):
 #     """
@@ -50,40 +89,3 @@ import logging
 #     setattr(logging, levelName, levelNum)
 #     setattr(logging.getLoggerClass(), methodName, logForLevel)
 #     setattr(logging, methodName, logToRoot)
-
-
-def setup_train_loger(name: str) -> logging:
-    """Returs logger
-
-    Args:
-        name (str): _description_
-
-    Returns:
-        logging: _description_
-    """
-    logger = logging.getLogger(name)
-    handler = logging.FileHandler(f"logs/{name.lower()}.log")
-    formatter = logging.Formatter(
-        "%(asctime)s %(levelname)s %(message)s", "%Y-%m-%d %H:%M:%S"
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel("INFO")
-
-    return logger
-
-
-if __name__ == "__main__":
-    slow = setup_train_loger("SLOW")
-    normal = setup_train_loger("NORMAL")
-    fast = setup_train_loger("FAST")
-
-    print(slow.getEffectiveLevel())
-    slow.info("TEST LOG")
-    normal.info("TEST LOG")
-    fast.info("TEST LOG")
-
-    print(logging.Logger.manager.loggerDict)
-    # print(hasattr(logging, "SLOW"))
-    # print(hasattr(logging, "slow"))
-    # print(hasattr(logging.getLoggerClass(), "SLOW"))

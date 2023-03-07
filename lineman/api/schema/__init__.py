@@ -1,3 +1,3 @@
-from .schema import WelcomeSchema, StateSchema, ToggleSchema
+from .schema import StateSchema
 
-__all__ = [WelcomeSchema, StateSchema, ToggleSchema]
+__all__ = [StateSchema]

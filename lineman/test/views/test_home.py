@@ -1,16 +1,31 @@
-from unittest import TestCase
-from app import create_app
+# import pytest
+# from app import create_app
+# from api.models import db
+# from datetime import datetime
 
 
-class TestWelcome(TestCase):
-    def setUp(self):
-        self.app = create_app().test_client()
+# @pytest.fixture()
+# def app():
+#     app = create_app()
+#     app.config.update(
+#         {
+#             "TESTING": True,
+#         }
+#     )
 
-    def test_welcome(self):
-        """
-        Tests the route screen message
-        """
-        rv = self.app.get('/api/')
+#     yield app
 
-        # If we recalculate the hash on the block we should get the same result as we have stored
-        self.assertEqual({"message": 'Hello World!'}, rv.get_json())
+
+# def test_get_api_endpoint():
+#     with app.test_client() as c:
+#         response = c.get("api/v1/state")
+#         assert response.status_code == 200
+#         json_response = response.get_json()
+#         now = str(datetime.now())
+#         assert json_response == {"is_open": False, "timestamp": now}
+
+
+# def test_post_api_endpoint():
+#     with app.test_client() as c:
+#         response = c.post("api/v1/state", json={"toggle": "open"})
+#         assert response.status_code == 201
