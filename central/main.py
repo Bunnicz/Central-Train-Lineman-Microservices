@@ -1,10 +1,14 @@
 from redis import Redis
-import logging
 from os import environ
+import requests
+import json
+from logs.logs import setup_train_loger
+
 
 REDIS_HOST_NAME = environ.get("REDIS_HOST_NAME", "localhost")
 REDIS_PORT = environ.get("REDIS_PORT", 6379)
 STREAM_KEY = environ.get("STREAM_KEY", "stream")
+BASE = "http://127.0.0.1:5000/api/v1/"
 
 
 class TrainStreamConsumer:
@@ -27,64 +31,65 @@ class TrainStreamConsumer:
         port = self.redis_port
         self.redis_connection = Redis(hostname, port, decode_responses=True)
 
-    def get_train_data(self, sleep_ms: int = 5000):
-        try:
-            response = self.redis_connection.xread(
-                {self.stream_key: self.last_job_id}, count=1, block=sleep_ms
-            )
-            if response:
-                job = response[0]
-                self.current_job_id = job[1][0][0]
-                self.current_job_data = job[1][0][1]
-                if "current_speed" in self.current_job_data:
-                    self.train_current_speed = float(
-                        self.current_job_data["current_speed"]
-                    )
-                elif "near_station" in self.current_job_data:
-                    self.train_near_station = str(self.current_job_data["near_station"])
-                self.last_job_id = self.current_job_id
+    def setup_logers(self) -> None:
+        self.slow_log = setup_train_loger("SLOW")
+        self.normal_log = setup_train_loger("NORMAL")
+        self.fast_log = setup_train_loger("FAST")
+        self.station_log = setup_train_loger("STATION")
 
-        except ConnectionError as e:
-            print("ERROR REDIS CONNECTION: {}".format(e))
-
-    def listen_for_data(self):
+    def listen_for_data(self, sleep_ms: int = 5000) -> None:
         while True:
-            self.get_train_data()
-            if 0 <= self.train_current_speed < 40:
-                # self.log_to_file("logs/slow.log", self.train_current_speed)
-                slow = self.create_loger("slow")
-                # slow = logging.getLogger('slow')
-                # fh = logging.FileHandler('slow.log')
-                # slow.addHandler(fh)
-                slow.info(self.train_current_speed)
-            elif 40 <= self.train_current_speed < 140:
-                # self.log_to_file("logs/normal.log", self.train_current_speed)
-                normal = self.create_loger("normal")
-                normal.info(self.train_current_speed)
-            elif 140 <= self.train_current_speed < 180:
-                # self.log_to_file("logs/fast.log", self.train_current_speed)
-                fast = self.create_loger("fast")
-                fast.info(self.train_current_speed)
-            elif self.train_near_station:
-                # self.log_to_file("logs/station.log", self.train_near_station)
-                station = self.create_loger("station")
-                station.info(self.train_near_station)
-                # GET
-            # print(self.current_job_id, self.current_job_data)
+            try:
+                response = self.redis_connection.xread(
+                    {self.stream_key: self.last_job_id}, count=1, block=sleep_ms
+                )
+                if response:
+                    job = response[0]
+                    self.current_job_id = job[1][0][0]
+                    self.current_job_data = job[1][0][1]
+                    print(self.current_job_id, self.current_job_data)
 
-    def create_loger(file_name: str) -> callable[logging]:
-        logging.basicConfig(
-            format="%(asctime)s %(levelname)s %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-            encoding="utf-8",
-        )
-        logger = logging.getLogger(file_name)
-        fh = logging.FileHandler(file_name + ".log")
-        logger.addHandler(fh)
-        return logger
+                    if "current_speed" in self.current_job_data:
+                        train_current_speed = float(
+                            self.current_job_data["current_speed"]
+                        )
+                        if 0 <= train_current_speed < 40:
+                            self.slow_log.info(
+                                f"Train current speed: {train_current_speed}"
+                            )
+                        elif 40 <= train_current_speed < 140:
+                            self.normal_log.info(
+                                f"Train current speed: {train_current_speed}"
+                            )
+                        elif 140 <= train_current_speed < 180:
+                            self.fast_log.info(
+                                f"Train current speed: {train_current_speed}"
+                            )
+                    elif "near_station" in self.current_job_data:
+                        train_near_station = self.current_job_data["near_station"]
+                        self.station_log.info(
+                            f"Train is approaching: {train_near_station} station"
+                        )
+                        # self.request_lineman()
+                    self.last_job_id = self.current_job_id
+
+            except ConnectionError as error:
+                print("ERROR REDIS CONNECTION: {}".format(error))
+
+    def get_lineman_state(self):
+        response = requests.get(BASE + "state")
+        response = json.loads(response)
+        print(response)
+        pass
+
+    def post_lineman_state(self, msg):
+        data = {"": "Open"}
+        data = json.dumps(data)
+        response = requests.get(BASE + "state/" + msg)
 
 
 if __name__ == "__main__":
     CentralConsumer = TrainStreamConsumer(REDIS_HOST_NAME, REDIS_PORT, STREAM_KEY)
     CentralConsumer.connect_to_redis()
+    CentralConsumer.setup_logers()
     CentralConsumer.listen_for_data()

@@ -7,5 +7,10 @@ pytest==7.2.2
 Flask==2.2.3
 # SQLAlchemy==2.0.4
 Flask-SQLAlchemy==3.0.3 
-psycopg2==2.9.5 
-Flask-Migrate==4.0.4 
+# psycopg2==2.9.5 
+psycopg2-binary==2.9.5
+# Flask-Migrate==4.0.4 
+flasgger==0.9.5
+flask-marshmallow==0.14.0
+marshmallow-sqlalchemy==0.29.0 
+apispec==6.1.0 

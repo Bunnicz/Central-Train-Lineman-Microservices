@@ -31,18 +31,16 @@ def _stream_send_data(
     REDIS_HOST_NAME: str, REDIS_PORT: str, STREAM_KEY: str, data: dict
 ) -> None:
     try:
-        r = Redis(
+        redis = Redis(
             host=REDIS_HOST_NAME,
             port=REDIS_PORT,
             decode_responses=True,
         )
-        job = data
-        job_id = r.xadd(STREAM_KEY, job)
-        print(f"Created job {job_id}:")
-        print(job)
+        job_id = redis.xadd(STREAM_KEY, data)
+        print(f"Created job {job_id}: {data}")
 
-    except ConnectionError as e:
-        print("ERROR REDIS CONNECTION: {}".format(e))
+    except ConnectionError as error:
+        print("ERROR REDIS CONNECTION: {}".format(error))
 
 
 @shared_task
